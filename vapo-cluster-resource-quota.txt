@@ -1,0 +1,120 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: vapo-cluster-resource-quota
+  namespace: acm-policies
+  creationTimestamp: 2021-12-28T18:50:26Z
+  generation: 5
+  managedFields:
+    - apiVersion: policy.open-cluster-management.io/v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:spec:
+          .: {}
+          f:disabled: {}
+          f:policy-templates: {}
+          f:remediationAction: {}
+      manager: unknown
+      operation: Update
+      time: 2021-12-28T18:50:26Z
+    - apiVersion: policy.open-cluster-management.io/v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:status:
+          .: {}
+          f:compliant: {}
+          f:placement: {}
+          f:status: {}
+      manager: governance-policy-propagator
+      operation: Update
+      time: 2022-01-31T19:10:02Z
+  resourceVersion: "423943511"
+  uid: 4e792390-207e-4d0c-bfa9-99953eda490c
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: vapo-cluster-resource-quota
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - default
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: quota.openshift.io/v1
+                kind: ClusterResourceQuota
+                metadata:
+                  name: resourcesquota
+                spec:
+                  quota:
+                    hard:
+                      cpu: "5"
+                      memory: 5000Mi
+                      requests.storage: 10Gi
+                  selector:
+                    labels:
+                      matchLabels:
+                        vapo-resourcequota: userproject
+          remediationAction: enforce
+          severity: low
+  remediationAction: enforce
+status:
+  compliant: Compliant
+  placement:
+    - placementBinding: vapo-cluster-resource-quota-placmentbinding
+      placementRule: vapo-cluster-resource-quota-placmentrule
+  status:
+    - clustername: aws-sbx2
+      clusternamespace: aws-sbx2
+      compliant: Compliant
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: vapo-cluster-resource-quota-placmentrule
+  namespace: acm-policies
+  annotations:
+    open-cluster-management.io/user-group: c3lzdGVtOmF1dGhlbnRpY2F0ZWQ6b2F1dGgsc3lzdGVtOmF1dGhlbnRpY2F0ZWQ=
+    open-cluster-management.io/user-identity: b2l0YWFjbmFsbGFu
+  creationTimestamp: 2021-12-28T18:50:26Z
+  generation: 1
+  resourceVersion: "423935002"
+  uid: 7172a473-ee09-49bb-84fc-77474e11e3fe
+spec:
+  clusterConditions:
+    - status: "True"
+      type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - key: name
+        operator: In
+        values:
+          - aws-sbx2
+status:
+  decisions:
+    - clusterName: aws-sbx2
+      clusterNamespace: aws-sbx2
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: vapo-cluster-resource-quota-placmentbinding
+  namespace: acm-policies
+  creationTimestamp: 2021-12-28T18:50:26Z
+  generation: 1
+  resourceVersion: "321567748"
+  uid: de2e179e-27bf-4877-b638-0245f4832442
+placementRef:
+  name: vapo-cluster-resource-quota-placmentrule
+  apiGroup: apps.open-cluster-management.io
+  kind: PlacementRule
+subjects:
+  - name: vapo-cluster-resource-quota
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
